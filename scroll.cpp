@@ -7,14 +7,19 @@
 #include <stdio.h>
 
 
+constexpr unsigned long fudgVal {12};
+
+
 // Stores keywords and their colour associations.
 namespace keyWordColours
 {
   namespace colours
   {
+    const char defaultColour [] =	"\033[0m";
     const char blue [] =       	"\033[34;40m";
     const char brightRed [] = 	"\033[91;40m";
     const char cyan [] =       	"\033[94;40m";
+    const char yellow [] =	"\033[93;40m";
     
   }
   
@@ -160,6 +165,14 @@ namespace keyWordColours
       inline static const std::string c {colours::brightRed};
     }
   }
+  namespace l
+  {
+    namespace longKW
+    {
+      inline static const std::string kW {"long"};
+      inline static const std::string c {colours::brightRed};
+    }
+  }
   namespace n
   {
     namespace namespaceKW
@@ -301,6 +314,14 @@ namespace keyWordColours
       inline static const std::string c {colours::blue};
     }
   }
+  namespace w
+  {
+    namespace whileKW
+    {
+      inline static const std::string kW {"while"};
+      inline static const std::string c {colours::blue};
+    }
+  }
 } 
 
 
@@ -328,12 +349,36 @@ int main()
       if(textBuffer.size() > 0)
 	{
 	  std::string keyWord {};
-	  
-	  for(unsigned long iter {}; iter < textBuffer.size(); )
-	    {
-	      std::this_thread::sleep_for(std::chrono::milliseconds(3));
+	  unsigned long iter {};
 
-	      if(!printKeyWord(textBuffer, iter))
+	  // We need to consume the first character before we can check for
+	  // single line comments (yes this is hacky.)
+	  if(!printKeyWord(textBuffer, iter))
+		{
+		  std::cout<<textBuffer[iter];
+		  setvbuf(stdout, NULL, _IONBF, 0);
+
+		  ++iter;	// It wasn't inc'ed in printKeyWord.
+		}
+	  
+	  for( ; iter < textBuffer.size(); )
+	    {
+	      std::this_thread::sleep_for(std::chrono::milliseconds(2));
+
+	      if(iter < (textBuffer.size() -fudgVal) && textBuffer[iter -1] != '\\'
+		 && textBuffer[iter] == '/' && textBuffer[iter +1] == '/')
+		{
+		  std::cout<<keyWordColours::colours::yellow;
+		  while(iter < textBuffer.size() && textBuffer[iter] != '\n')
+		    {
+		      std::cout<<textBuffer[iter];
+		      // std::cout<<textBuffer.size()<<", "<<iter<<'\n';
+		      setvbuf(stdout, NULL, _IONBF, 0);
+		      iter++;
+		    }
+		  std::cout<<keyWordColours::colours::defaultColour;
+		}
+ 	      else if(!printKeyWord(textBuffer, iter))
 		{
 		  std::cout<<textBuffer[iter];
 		  setvbuf(stdout, NULL, _IONBF, 0);
@@ -355,7 +400,7 @@ bool printKeyWord(const std::vector<char> & textBuffer, unsigned long & point)
 {
   bool retVal {false};
 
-  if(point < textBuffer.size() -12)				// This line is a cheap hack!
+  if(point < textBuffer.size() -fudgVal)				// This line is a cheap hack!
     {
       if(point > 1 && textBuffer[point -1] == ' ')
 	{
@@ -393,40 +438,263 @@ bool printKeyWord(const std::vector<char> & textBuffer, unsigned long & point)
 		  printColouredKeyWord(textBuffer, c::charKW::kW, point, c::charKW::c);
 		  retVal = true;
 		}
-	      else 			      if(isKeyWord(textBuffer, c::classKW::kW, point +1))
+	      else if(isKeyWord(textBuffer, c::classKW::kW, point +1))
 		{
 		  printColouredKeyWord(textBuffer, c::classKW::kW, point, c::classKW::c);
+		  retVal = true;
+		}
+	      
+	      else if(isKeyWord(textBuffer, c::constexprKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, c::constexprKW::kW, point, c::constexprKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, c::constKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, c::constKW::kW, point, c::constKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, c::continueKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, c::continueKW::kW, point, c::continueKW::c);
 		  retVal = true;
 		}
 
 	      break;;
 	    case 'd':			// default, delete, do, double
+	      if(isKeyWord(textBuffer, d::defaultKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, d::defaultKW::kW, point, d::defaultKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, d::deleteKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, d::deleteKW::kW, point, d::deleteKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, d::doubleKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, d::doubleKW::kW, point, d::doubleKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, d::doKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, d::doKW::kW, point, d::doKW::c);
+		  retVal = true;
+		}
 	      break;
 	    case 'e':			// else, enum, extern
+	      if(isKeyWord(textBuffer, e::elseKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, e::elseKW::kW, point, e::elseKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, e::enumKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, e::enumKW::kW, point, e::enumKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, e::externKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, e::externKW::kW, point, e::externKW::c);
+		  retVal = true;
+		}
 	      break;
 	    case 'f':			// false, float, for, friend
+	      if(isKeyWord(textBuffer, f::falseKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, f::falseKW::kW, point, f::falseKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, f::floatKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, f::floatKW::kW, point, f::floatKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, f::forKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, f::forKW::kW, point, f::forKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, f::friendKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, f::friendKW::kW, point, f::friendKW::c);
+		  retVal = true;
+		}
 	      break;
 	    case 'g':			// goto
+	      if(isKeyWord(textBuffer, g::gotoKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, g::gotoKW::kW, point, g::gotoKW::c);
+		  retVal = true;
+		}
 	      break;
 	    case 'i':			// if, inline, int
+	      if(isKeyWord(textBuffer, i::ifKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, i::ifKW::kW, point, i::ifKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, i::inlineKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, i::inlineKW::kW, point, i::inlineKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, i::intKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, i::intKW::kW, point, i::intKW::c);
+		  retVal = true;
+		}
 	      break;
 	    case 'l':			// long
+	      if(isKeyWord(textBuffer, l::longKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, l::longKW::kW, point, l::longKW::c);
+		  retVal = true;
+		}
 	      break;
 	    case 'n':			// namespace, new, nullptr
+	      if(isKeyWord(textBuffer, n::namespaceKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, n::namespaceKW::kW, point, n::namespaceKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, n::newKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, n::newKW::kW, point, n::newKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, n::nullptrKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, n::nullptrKW::kW, point, n::nullptrKW::c);
+		  retVal = true;
+		}
 	      break;
 	    case 'p':			// private, protected, public
+	      if(isKeyWord(textBuffer, p::privateKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, p::privateKW::kW, point, p::privateKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, p::protectedKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, p::protectedKW::kW, point, p::protectedKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, p::publicKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, p::publicKW::kW, point, p::publicKW::c);
+		  retVal = true;
+		}
 	      break;
 	    case 'r':			// return
+	      if(isKeyWord(textBuffer, r::returnKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, r::returnKW::kW, point, r::returnKW::c);
+		  retVal = true;
+		}
 	      break;
-	    case 's':			// short, signed, sizeof, static, struct, switch
+	    case 's':			// short, signed, sizeof, static,
+					// struct, switch
+	      if(isKeyWord(textBuffer, s::shortKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, s::shortKW::kW, point, s::shortKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, s::signedKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, s::signedKW::kW, point, s::signedKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, s::sizeofKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, s::sizeofKW::kW, point, s::sizeofKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, s::staticKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, s::staticKW::kW, point, s::staticKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, s::structKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, s::structKW::kW, point, s::structKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, s::switchKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, s::switchKW::kW, point, s::switchKW::c);
+		  retVal = true;
+		}
 	      break;
-	    case 't':			// template, this, throw true, try, typedef, typename
+	    case 't':			// template, this, throw true, try,
+					// typedef, typename
+	      if(isKeyWord(textBuffer, t::templateKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, t::templateKW::kW, point, t::templateKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, t::thisKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, t::thisKW::kW, point, t::thisKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, t::throwKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, t::throwKW::kW, point, t::throwKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, t::trueKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, t::trueKW::kW, point, t::trueKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, t::tryKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, t::tryKW::kW, point, t::tryKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, t::typedefKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, t::typedefKW::kW, point, t::typedefKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, t::typenameKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, t::typenameKW::kW, point, t::typenameKW::c);
+		  retVal = true;
+		}
 	      break;
 	    case 'u':			// unsigned, using
+	      if(isKeyWord(textBuffer, u::unsignedKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, u::unsignedKW::kW, point, u::unsignedKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, u::usingKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, u::usingKW::kW, point, u::usingKW::c);
+		  retVal = true;
+		}
 	      break;
 	    case 'v':			// virtual, void
+	      if(isKeyWord(textBuffer, v::virtualKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, v::virtualKW::kW, point, v::virtualKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, v::voidKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, v::voidKW::kW, point, v::voidKW::c);
+		  retVal = true;
+		}
 	      break;
 	    case 'w':			// while
+	      if(isKeyWord(textBuffer, w::whileKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, w::whileKW::kW, point, w::whileKW::c);
+		  retVal = true;
+		}
 	      break;
 	    }
 	}
@@ -461,7 +729,7 @@ void printColouredKeyWord(const std::vector<char> & textBuffer, const std::strin
       std::cout<<textBuffer[iter];
       setvbuf(stdout, NULL, _IONBF, 0);
     }
-  std::cout<<"\033[0m";		// Disable's colour.
+  std::cout<<keyWordColours::colours::defaultColour;		// Disable's colour.
 
   point += keyWord.size();
 }
