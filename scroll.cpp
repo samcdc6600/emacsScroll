@@ -35,7 +35,7 @@ namespace keyWordColours
   {
     namespace caseKW
     {
-      inline static const std::string KW {"case"};
+      inline static const std::string kW {"case"};
       inline static const std::string c {colours::blue};
     }
     namespace catchKW
@@ -364,24 +364,41 @@ bool printKeyWord(const std::vector<char> & textBuffer, unsigned long & point)
 	  switch(textBuffer[point])
 	    {
 	    case 'b':			// bool, break
-	      {
-		if(isKeyWord(textBuffer, b::boolKW::kW, point +1))
-		  {
-		    printColouredKeyWord(textBuffer, b::boolKW::kW, point, b::boolKW::c);
-		    retVal = true;
-		  }
-		else
-		  {
-		    if(isKeyWord(textBuffer, b::breakKW::kW, point +1))
-		      {
-			printColouredKeyWord(textBuffer, b::breakKW::kW, point, b::breakKW::c);
-			retVal = true;
-		      }
-		  }
-	      }
+	      if(isKeyWord(textBuffer, b::boolKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, b::boolKW::kW, point, b::boolKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, b::breakKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, b::breakKW::kW, point, b::breakKW::c);
+		  retVal = true;
+		}
 	      break;
 	  
-	    case 'c':			// case, catch, char, class, const, constexpr, continue
+	    case 'c':			// case, catch, char, class, const,
+					// constexpr, continue
+	      if(isKeyWord(textBuffer, c::caseKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, c::caseKW::kW, point, c::caseKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, c::catchKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, c::catchKW::kW, point, c::catchKW::c);
+		  retVal = true;
+		}
+	      else if(isKeyWord(textBuffer, c::charKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, c::charKW::kW, point, c::charKW::c);
+		  retVal = true;
+		}
+	      else 			      if(isKeyWord(textBuffer, c::classKW::kW, point +1))
+		{
+		  printColouredKeyWord(textBuffer, c::classKW::kW, point, c::classKW::c);
+		  retVal = true;
+		}
+
 	      break;;
 	    case 'd':			// default, delete, do, double
 	      break;
