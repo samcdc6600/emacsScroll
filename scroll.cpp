@@ -20,6 +20,7 @@ namespace keyWordColours
     const char brightRed [] = 	"\033[91;40m";
     const char cyan [] =       	"\033[94;40m";
     const char yellow [] =	"\033[93;40m";
+    const char planeTextColour [] =	"\033[96;40m";
     
   }
   
@@ -330,7 +331,9 @@ bool isKeyWord(const std::vector<char> & textBuffer, const std::string & keyWord
 	       unsigned long point);
 void printColouredKeyWord(const std::vector<char> & textBuffer, const std::string & keyWord,
 			  unsigned long & point, const std::string & colour);
+void printPlainKeyWord(const std::vector<char> & textBuffer, unsigned long & point);
 
+  
 int main()
 {
   std::fstream textFileBuffer {"insertText.cpp"};
@@ -355,10 +358,7 @@ int main()
 	  // single line comments (yes this is hacky.)
 	  if(!printKeyWord(textBuffer, iter))
 		{
-		  std::cout<<textBuffer[iter];
-		  setvbuf(stdout, NULL, _IONBF, 0);
-
-		  ++iter;	// It wasn't inc'ed in printKeyWord.
+		  printPlainKeyWord(textBuffer, iter);
 		}
 	  
 	  for( ; iter < textBuffer.size(); )
@@ -372,7 +372,6 @@ int main()
 		  while(iter < textBuffer.size() && textBuffer[iter] != '\n')
 		    {
 		      std::cout<<textBuffer[iter];
-		      // std::cout<<textBuffer.size()<<", "<<iter<<'\n';
 		      setvbuf(stdout, NULL, _IONBF, 0);
 		      iter++;
 		    }
@@ -380,10 +379,7 @@ int main()
 		}
  	      else if(!printKeyWord(textBuffer, iter))
 		{
-		  std::cout<<textBuffer[iter];
-		  setvbuf(stdout, NULL, _IONBF, 0);
-
-		  ++iter;	// It wasn't inc'ed in printKeyWord.
+		  printPlainKeyWord(textBuffer, iter);
 		}
 	    }
 	}
@@ -719,6 +715,7 @@ bool isKeyWord(const std::vector<char> & textBuffer, const std::string & keyWord
   return true;
 }
 
+
 void printColouredKeyWord(const std::vector<char> & textBuffer, const std::string & keyWord,
 			  unsigned long & point, const std::string & colour)
 {
@@ -732,4 +729,14 @@ void printColouredKeyWord(const std::vector<char> & textBuffer, const std::strin
   std::cout<<keyWordColours::colours::defaultColour;		// Disable's colour.
 
   point += keyWord.size();
+}
+
+
+void printPlainKeyWord(const std::vector<char> & textBuffer, unsigned long & point)
+{
+  std::cout<<keyWordColours::colours::planeTextColour;
+  std::cout<<textBuffer[point];
+  setvbuf(stdout, NULL, _IONBF, 0);
+  std::cout<<keyWordColours::colours::defaultColour;
+  ++point;	// It wasn't inc'ed in printKeyWord.
 }
