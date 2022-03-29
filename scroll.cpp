@@ -18,8 +18,9 @@ namespace keyWordColours
     const char defaultColour [] =	"\033[0m";
     const char blue [] =       	"\033[34;40m";
     const char brightRed [] = 	"\033[91;40m";
-    const char cyan [] =       	"\033[94;40m";
+    const char cyan [] =       	"\033[35;40m";
     const char yellow [] =	"\033[93;40m";
+    const char darkYellow [] =	"\033[33;40m";
     const char planeTextColour [] =	"\033[96;40m";
     
   }
@@ -331,7 +332,7 @@ bool isKeyWord(const std::vector<char> & textBuffer, const std::string & keyWord
 	       unsigned long point);
 void printColouredKeyWord(const std::vector<char> & textBuffer, const std::string & keyWord,
 			  unsigned long & point, const std::string & colour);
-void printPlainKeyWord(const std::vector<char> & textBuffer, unsigned long & point);
+void printPlain(const std::vector<char> & textBuffer, unsigned long & point);
 
   
 int main()
@@ -357,16 +358,50 @@ int main()
 	  // We need to consume the first character before we can check for
 	  // single line comments (yes this is hacky.)
 	  if(!printKeyWord(textBuffer, iter))
-		{
-		  printPlainKeyWord(textBuffer, iter);
-		}
+	    {
+	      printPlain(textBuffer, iter);
+	    }
 	  
 	  for( ; iter < textBuffer.size(); )
 	    {
-	      std::this_thread::sleep_for(std::chrono::milliseconds(2));
+	      std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
-	      if(iter < (textBuffer.size() -fudgVal) && textBuffer[iter -1] != '\\'
-		 && textBuffer[iter] == '/' && textBuffer[iter +1] == '/')
+	      if(iter < (textBuffer.size() -fudgVal) &&
+		 textBuffer[iter -1] != '\\' && textBuffer[iter] == '/'
+		 && textBuffer[iter +1] == '*')
+		{
+		  bool end {false};
+
+		  std::cout<<keyWordColours::colours::darkYellow;
+		  std::cout<<textBuffer[iter];
+		  setvbuf(stdout, NULL, _IONBF, 0);
+		  iter++;
+		  std::cout<<textBuffer[iter];
+		  setvbuf(stdout, NULL, _IONBF, 0);
+		  iter++;
+		  while(iter < (textBuffer.size() -fudgVal) && !end)
+		    {
+		      std::cout<<textBuffer[iter];
+		      setvbuf(stdout, NULL, _IONBF, 0);
+		      iter++;
+		      if(textBuffer[-iter] != '\\' && textBuffer[iter] == '*'
+			 && textBuffer[iter +1] == '/')
+			{
+			  end = true;
+			}
+		    }
+		  std::cout<<textBuffer[iter];
+		  setvbuf(stdout, NULL, _IONBF, 0);
+		  iter++;
+		  std::cout<<textBuffer[iter];
+		  setvbuf(stdout, NULL, _IONBF, 0);
+		  iter++;
+		  std::cout<<keyWordColours::colours::defaultColour;
+		}
+	      else if(iter < (textBuffer.size() -fudgVal) &&
+		      textBuffer[iter -1] &&
+		      textBuffer[iter -1] != '\\' && textBuffer[iter] == '/'
+		      && textBuffer[iter +1] == '/')
 		{
 		  std::cout<<keyWordColours::colours::yellow;
 		  while(iter < textBuffer.size() && textBuffer[iter] != '\n')
@@ -375,11 +410,10 @@ int main()
 		      setvbuf(stdout, NULL, _IONBF, 0);
 		      iter++;
 		    }
-		  std::cout<<keyWordColours::colours::defaultColour;
 		}
- 	      else if(!printKeyWord(textBuffer, iter))
+	      else if(!printKeyWord(textBuffer, iter))
 		{
-		  printPlainKeyWord(textBuffer, iter);
+		  printPlain(textBuffer, iter);
 		}
 	    }
 	}
@@ -732,7 +766,7 @@ void printColouredKeyWord(const std::vector<char> & textBuffer, const std::strin
 }
 
 
-void printPlainKeyWord(const std::vector<char> & textBuffer, unsigned long & point)
+void printPlain(const std::vector<char> & textBuffer, unsigned long & point)
 {
   std::cout<<keyWordColours::colours::planeTextColour;
   std::cout<<textBuffer[point];
